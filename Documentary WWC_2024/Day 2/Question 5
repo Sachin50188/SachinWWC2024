@@ -1,0 +1,174 @@
+#include <iostream>
+#include <string>
+using namespace std;
+
+struct Compartment {
+    int compartmentID;
+    int totalSeats;
+    int bookedSeats;
+    Compartment* next;
+
+    Compartment(int id, int seats) : compartmentID(id), totalSeats(seats), bookedSeats(0), next(nullptr) {}
+};
+
+struct Train {
+    string trainName;
+    Compartment* headCompartment;
+    Train* next;
+
+    Train(string name) : trainName(name), headCompartment(nullptr), next(nullptr) {}
+};
+
+class TrainReservationSystem {
+private:
+    Train* headTrain;
+
+    Train* findTrain(const string& name) {
+        Train* current = headTrain;
+        while (current) {
+            if (current->trainName == name) return current;
+            current = current->next;
+        }
+        return nullptr;
+    }
+
+    Compartment* findCompartment(Train* train, int compartmentID) {
+        Compartment* current = train->headCompartment;
+        while (current) {
+            if (current->compartmentID == compartmentID) return current;
+            current = current->next;
+        }
+        return nullptr;
+    }
+
+public:
+    TrainReservationSystem() : headTrain(nullptr) {}
+
+    void addTrain(const string& trainName) {
+        Train* newTrain = new Train(trainName);
+        newTrain->next = headTrain;
+        headTrain = newTrain;
+    }
+
+    void addCompartment(const string& trainName, int compartmentID, int totalSeats) {
+        Train* train = findTrain(trainName);
+        if (!train) {
+            cout << "Train not found.\n";
+            return;
+        }
+
+        Compartment* newCompartment = new Compartment(compartmentID, totalSeats);
+        newCompartment->next = train->headCompartment;
+        train->headCompartment = newCompartment;
+    }
+
+    void bookSeats(const string& trainName, int compartmentID, int seats) {
+        Train* train = findTrain(trainName);
+        if (!train) {
+            cout << "Train not found.\n";
+            return;
+        }
+
+        Compartment* compartment = findCompartment(train, compartmentID);
+        if (!compartment) {
+            cout << "Compartment not found.\n";
+            return;
+        }
+
+        if (compartment->bookedSeats + seats <= compartment->totalSeats) {
+            compartment->bookedSeats += seats;
+            cout << "Successfully booked " << seats << " seats in Compartment " << compartmentID << ".\n";
+        } else {
+            cout << "Not enough available seats in Compartment " << compartmentID << ".\n";
+        }
+    }
+
+    void cancelSeats(const string& trainName, int compartmentID, int seats) {
+        Train* train = findTrain(trainName);
+        if (!train) {
+            cout << "Train not found.\n";
+            return;
+        }
+
+        Compartment* compartment = findCompartment(train, compartmentID);
+        if (!compartment) {
+            cout << "Compartment not found.\n";
+            return;
+        }
+
+        if (compartment->bookedSeats >= seats) {
+            compartment->bookedSeats -= seats;
+            cout << "Successfully canceled " << seats << " seats in Compartment " << compartmentID << ".\n";
+        } else {
+            cout << "Not enough booked seats to cancel in Compartment " << compartmentID << ".\n";
+        }
+    }
+
+    void checkAvailability(const string& trainName, int compartmentID) {
+        Train* train = findTrain(trainName);
+        if (!train) {
+            cout << "Train not found.\n";
+            return;
+        }
+
+        Compartment* compartment = findCompartment(train, compartmentID);
+        if (!compartment) {
+            cout << "Compartment not found.\n";
+            return;
+        }
+
+        int availableSeats = compartment->totalSeats - compartment->bookedSeats;
+        cout << "Compartment " << compartmentID << " has " << availableSeats << " available seats.\n";
+    }
+
+    void displaySystem() {
+        Train* currentTrain = headTrain;
+        while (currentTrain) {
+            cout << "Train: " << currentTrain->trainName << endl;
+            Compartment* currentCompartment = currentTrain->headCompartment;
+            while (currentCompartment) {
+                cout << "  Compartment ID: " << currentCompartment->compartmentID
+                     << ", Total Seats: " << currentCompartment->totalSeats
+                     << ", Booked Seats: " << currentCompartment->bookedSeats << endl;
+                currentCompartment = currentCompartment->next;
+            }
+            currentTrain = currentTrain->next;
+        }
+    }
+
+    ~TrainReservationSystem() {
+        while (headTrain) {
+            Train* tempTrain = headTrain;
+            headTrain = headTrain->next;
+
+            Compartment* currentCompartment = tempTrain->headCompartment;
+            while (currentCompartment) {
+                Compartment* tempCompartment = currentCompartment;
+                currentCompartment = currentCompartment->next;
+                delete tempCompartment;
+            }
+
+            delete tempTrain;
+        }
+    }
+};
+
+int main() {
+    TrainReservationSystem system;
+
+    system.addTrain("Express1");
+    system.addTrain("Express2");
+
+    system.addCompartment("Express1", 1, 50);
+    system.addCompartment("Express1", 2, 30);
+    system.addCompartment("Express2", 1, 40);
+
+    system.bookSeats("Express1", 1, 20);
+    system.bookSeats("Express1", 2, 10);
+    system.cancelSeats("Express1", 1, 5);
+    system.checkAvailability("Express1", 1);
+
+    system.displaySystem();
+
+    return 0;
+}
