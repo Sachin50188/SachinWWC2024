@@ -1,1 +1,167 @@
+In order to mimic how businesses manage their inventory, the assignment entails creating a warehouse inventory management system in C++. Practice with file management, user interaction, and object-oriented programming (OOP) are the objectives. The system has an intuitive menu-driven interface, tracks and maintains inventories, and notifies users when supplies are running short.
+
+
+
+CODE:
+#include <iostream>
+#include <vector>
+#include <string>
+#include <fstream>
+using namespace std;
+
+class Item {
+public:
+    string itemID;
+    string name;
+    string category;
+    int quantity;
+    int reorderLevel;
+    Item(string id, string n, string c, int q, int r)
+        : itemID(id), name(n), category(c), quantity(q), reorderLevel(r) {}
+    void displayItem() const {
+        cout << "ID: " << itemID << ", Name: " << name
+             << ", Category: " << category
+             << ", Quantity: " << quantity
+             << ", Reorder Level: " << reorderLevel << endl;
+    }
+    bool needsReorder() const {
+        return quantity < reorderLevel;
+    }
+};
+
+class InventoryManagementSystem {
+private:
+    vector<Item> inventory;
+public:
+    void addItem() {
+        string id, name, category;
+        int quantity, reorderLevel;
+        cout << "Enter Item ID: ";
+        cin >> id;
+        cout << "Enter Item Name: ";
+        cin.ignore();
+        getline(cin, name);
+        cout << "Enter Category: ";
+        getline(cin, category);
+        cout << "Enter Quantity: ";
+        cin >> quantity;
+        cout << "Enter Reorder Level: ";
+        cin >> reorderLevel;
+        inventory.emplace_back(id, name, category, quantity, reorderLevel);
+        cout << "Item added successfully!\n";
+    }
+    void updateStock() {
+        string id;
+        int quantity;
+        cout << "Enter Item ID to update: ";
+        cin >> id;
+        for (auto &item : inventory) {
+            if (item.itemID == id) {
+                cout << "Enter new quantity: ";
+                cin >> quantity;
+                item.quantity = quantity;
+                cout << "Stock updated successfully!\n";
+                return;
+            }
+        }
+        cout << "Item not found!\n";
+    }
+    void viewInventory() const {
+        cout << "\n--- Inventory ---\n";
+        for (const auto &item : inventory) {
+            item.displayItem();
+            if (item.needsReorder()) {
+                cout << "*** ALERT: Reorder needed! ***\n";
+            }
+        }
+        cout << "----------------\n";
+    }
+    void searchItem() const {
+        string query;
+        cout << "Enter name or category to search: ";
+        cin.ignore();
+        getline(cin, query);
+        bool found = false;
+        for (const auto &item : inventory) {
+            if (item.name == query || item.category == query) {
+                item.displayItem();
+                found = true;
+            }
+        }
+        if (!found) {
+            cout << "No items found!\n";
+        }
+    }
+    void exportToFile() const {
+        ofstream file("inventory.txt");
+        if (!file) {
+            cout << "Error creating file!\n";
+            return;
+        }
+        for (const auto &item : inventory) {
+            file << item.itemID << ", "
+                 << item.name << ", "
+                 << item.category << ", "
+                 << item.quantity << ", "
+                 << item.reorderLevel << "\n";
+        }
+        file.close();
+        cout << "Inventory exported to inventory.txt\n";
+    }
+};
+int main() {
+    InventoryManagementSystem ims;
+    int choice;
+    do {
+        cout << "\n--- Warehouse Inventory Management System ---\n";
+        cout << "1. Add Item\n";
+        cout << "2. Update Stock\n";
+        cout << "3. View Inventory\n";
+        cout << "4. Search Item\n";
+        cout << "5. Export Inventory to File\n";
+        cout << "6. Exit\n";
+        cout << "Enter your choice: ";
+        cin >> choice;
+        switch (choice) {
+        case 1:
+            ims.addItem();
+            break;
+        case 2:
+            ims.updateStock();
+            break;
+        case 3:
+            ims.viewInventory();
+            break;
+        case 4:
+            ims.searchItem();
+            break;
+        case 5:
+            ims.exportToFile();
+            break;
+        case 6:
+            cout << "Exiting the system. Goodbye!\n";
+            break;
+        default:
+            cout << "Invalid choice! Try again.\n";
+        }
+    } while (choice != 6);
+    return 0;
+}
+
+
+
+
+
+
+
+OUTPUT:
+--- Warehouse Inventory Management System ---
+1. Add Item
+2. Update Stock
+3. View Inventory
+4. Search Item
+5. Export Inventory to File
+6. Exit
+Enter your choice: 
+
 
