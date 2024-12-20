@@ -1,0 +1,106 @@
+#include <iostream>
+#include <string>
+using namespace std;
+
+struct Task {
+    int taskID;
+    int priority;
+    int executionTime;
+    int periodicInterval;
+    Task* next;
+
+    Task(int id, int p, int time, int interval = -1)
+        : taskID(id), priority(p), executionTime(time), periodicInterval(interval), next(nullptr) {}
+};
+
+class TaskScheduler {
+private:
+    Task* head;
+
+    void insertTaskInOrder(Task* newTask) {
+        if (!head || newTask->priority > head->priority) {
+            newTask->next = head;
+            head = newTask;
+        } else {
+            Task* current = head;
+            while (current->next && current->next->priority >= newTask->priority) {
+                current = current->next;
+            }
+            newTask->next = current->next;
+            current->next = newTask;
+        }
+    }
+
+public:
+    TaskScheduler() : head(nullptr) {}
+
+    void addTask(int id, int priority, int executionTime, int periodicInterval = -1) {
+        Task* newTask = new Task(id, priority, executionTime, periodicInterval);
+        insertTaskInOrder(newTask);
+    }
+
+    void completeTask() {
+        if (!head) {
+            cout << "No tasks to complete.\n";
+            return;
+        }
+
+        Task* completedTask = head;
+        cout << "Completing Task ID: " << completedTask->taskID << endl;
+
+        if (completedTask->periodicInterval > 0) {
+            completedTask->executionTime = completedTask->periodicInterval;
+            addTask(completedTask->taskID, completedTask->priority, completedTask->executionTime, completedTask->periodicInterval);
+        }
+
+        head = head->next;
+        delete completedTask;
+    }
+
+    void displayTasks() {
+        if (!head) {
+            cout << "Task queue is empty.\n";
+            return;
+        }
+
+        Task* current = head;
+        cout << "Current Task Queue: \n";
+        while (current) {
+            cout << "Task ID: " << current->taskID
+                 << ", Priority: " << current->priority
+                 << ", Execution Time: " << current->executionTime
+                 << (current->periodicInterval > 0 ? ", Periodic" : "")
+                 << endl;
+            current = current->next;
+        }
+    }
+
+    void simulate() {
+        while (head) {
+            displayTasks();
+            completeTask();
+            cout << "\n";
+        }
+    }
+
+    ~TaskScheduler() {
+        while (head) {
+            Task* temp = head;
+            head = head->next;
+            delete temp;
+        }
+    }
+};
+
+int main() {
+    TaskScheduler scheduler;
+
+    scheduler.addTask(1, 5, 10);  
+    scheduler.addTask(2, 8, 15);  
+    scheduler.addTask(3, 3, 20);  
+    scheduler.addTask(4, 8, 25, 25); 
+
+    scheduler.simulate();
+
+    return 0;
+}
