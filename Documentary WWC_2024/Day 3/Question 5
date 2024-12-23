@@ -1,0 +1,36 @@
+#include <iostream>
+#include <cmath>
+using namespace std;
+
+class Solution {
+public:
+    const long long MOD = 1e9 + 7;
+
+    long long modPow(long long base, long long exp, long long mod) {
+        long long result = 1;
+        while (exp > 0) {
+            if (exp % 2 == 1) {
+                result = (result * base) % mod;
+            }
+            base = (base * base) % mod;
+            exp /= 2;
+        }
+        return result;
+    }
+
+    int minNonZeroProduct(int p) {
+        long long maxElement = (1LL << p) - 1; 
+        long long pairCount = (1LL << (p - 1)) - 1; 
+        long long product = maxElement % MOD;
+
+        product = (product * modPow(maxElement - 1, pairCount, MOD)) % MOD;
+        return product;
+    }
+};
+
+int main() {
+    Solution solution;
+    int p = 3; 
+    cout << "Minimum non-zero product: " << solution.minNonZeroProduct(p) << endl;
+    return 0;
+}
