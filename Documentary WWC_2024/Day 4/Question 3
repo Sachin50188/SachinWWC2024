@@ -1,0 +1,72 @@
+#include <iostream>
+#include <vector>
+#include <string>
+#include <algorithm>
+#include <cmath>
+#include <map>
+
+struct CatalogItem {
+    std::string title;
+    int releaseYear;
+    int totalViews;
+    double userRating;
+    double relevanceScore;
+
+    CatalogItem(const std::string& t, int year, int views, double rating, double score = 0.0)
+        : title(t), releaseYear(year), totalViews(views), userRating(rating), relevanceScore(score) {}
+};
+
+double calculateTrendingScore(const CatalogItem& item) {
+    const int currentYear = 2024;
+    double recencyFactor = std::max(1.0, 10.0 / (currentYear - item.releaseYear + 1));
+    return item.totalViews * 0.6 + item.userRating * 100.0 * recencyFactor;
+}
+
+bool compareByTrending(const CatalogItem& a, const CatalogItem& b) {
+    return calculateTrendingScore(a) > calculateTrendingScore(b);
+}
+
+bool compareByRelevance(const CatalogItem& a, const CatalogItem& b) {
+    return a.relevanceScore > b.relevanceScore;
+}
+
+void calculateRelevanceScores(std::vector<CatalogItem>& catalog, const std::map<std::string, int>& userHistory) {
+    for (auto& item : catalog) {
+        item.relevanceScore = userHistory.count(item.title) ? userHistory.at(item.title) * 1.5 : 0.5 * item.totalViews;
+    }
+}
+
+int main() {
+
+    std::vector<CatalogItem> catalog = {
+        {"Movie A", 2023, 500000, 4.5},
+        {"TV Show B", 2022, 800000, 4.7},
+        {"Movie C", 2019, 300000, 4.2},
+        {"TV Show D", 2024, 1000000, 4.8},
+        {"Movie E", 2020, 400000, 4.3}
+    };
+
+    std::map<std::string, int> userHistory = {
+        {"Movie A", 10}, 
+        {"TV Show D", 5} 
+    };
+
+    std::sort(catalog.begin(), catalog.end(), compareByTrending);
+    std::cout << "Catalog sorted by Trending Score:\n";
+    for (const auto& item : catalog) {
+        std::cout << item.title << " | Year: " << item.releaseYear
+                  << " | Views: " << item.totalViews
+                  << " | Rating: " << item.userRating
+                  << " | Trending Score: " << calculateTrendingScore(item) << "\n";
+    }
+
+    calculateRelevanceScores(catalog, userHistory);
+
+    std::sort(catalog.begin(), catalog.end(), compareByRelevance);
+    std::cout << "\nCatalog sorted by Personalized Relevance:\n";
+    for (const auto& item : catalog) {
+        std::cout << item.title << " | Relevance Score: " << item.relevanceScore << "\n";
+    }
+
+    return 0;
+}
