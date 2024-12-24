@@ -1,0 +1,62 @@
+#include <iostream>
+#include <vector>
+#include <queue>
+#include <string>
+#include <algorithm>
+
+struct Advertisement {
+    std::string advertiserName;
+    double bidAmount;       
+    double engagementRate;  
+    double remainingBudget; 
+
+    Advertisement(const std::string& name, double bid, double engagement, double budget)
+        : advertiserName(name), bidAmount(bid), engagementRate(engagement), remainingBudget(budget) {}
+};
+
+struct AdComparator {
+    bool operator()(const Advertisement& a, const Advertisement& b) {
+
+        if (a.bidAmount != b.bidAmount) 
+            return a.bidAmount < b.bidAmount;
+        if (a.engagementRate != b.engagementRate) 
+            return a.engagementRate < b.engagementRate;
+        return a.remainingBudget < b.remainingBudget;
+    }
+};
+
+int main() {
+
+    std::priority_queue<Advertisement, std::vector<Advertisement>, AdComparator> adQueue;
+
+    adQueue.push(Advertisement("Advertiser A", 5.0, 0.02, 1000.0));
+    adQueue.push(Advertisement("Advertiser B", 7.0, 0.015, 800.0));
+    adQueue.push(Advertisement("Advertiser C", 6.5, 0.03, 1200.0));
+    adQueue.push(Advertisement("Advertiser D", 4.5, 0.025, 500.0));
+
+    std::cout << "Scheduled Ads:\n";
+    while (!adQueue.empty()) {
+        Advertisement ad = adQueue.top();
+        adQueue.pop();
+        std::cout << "Advertiser: " << ad.advertiserName
+                  << " | Bid: " << ad.bidAmount
+                  << " | Engagement: " << ad.engagementRate
+                  << " | Remaining Budget: " << ad.remainingBudget << "\n";
+    }
+
+    std::cout << "\nAdding new ads dynamically:\n";
+    adQueue.push(Advertisement("Advertiser E", 8.0, 0.02, 1500.0));
+    adQueue.push(Advertisement("Advertiser F", 6.0, 0.03, 900.0));
+
+    std::cout << "\nUpdated Scheduled Ads:\n";
+    while (!adQueue.empty()) {
+        Advertisement ad = adQueue.top();
+        adQueue.pop();
+        std::cout << "Advertiser: " << ad.advertiserName
+                  << " | Bid: " << ad.bidAmount
+                  << " | Engagement: " << ad.engagementRate
+                  << " | Remaining Budget: " << ad.remainingBudget << "\n";
+    }
+
+    return 0;
+}
