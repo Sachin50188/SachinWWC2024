@@ -1,0 +1,62 @@
+#include <iostream>
+#include <queue>
+#include <vector>
+#include <string>
+
+struct Patient {
+    std::string name;
+    int triagePriority;  
+    int severity;        
+    int arrivalTime;     
+
+    Patient(const std::string& n, int priority, int sev, int time)
+        : name(n), triagePriority(priority), severity(sev), arrivalTime(time) {}
+};
+
+struct PatientComparator {
+    bool operator()(const Patient& a, const Patient& b) {
+
+        if (a.triagePriority != b.triagePriority) 
+            return a.triagePriority > b.triagePriority;
+        if (a.severity != b.severity) 
+            return a.severity < b.severity;
+        return a.arrivalTime > b.arrivalTime;
+    }
+};
+
+int main() {
+
+    std::priority_queue<Patient, std::vector<Patient>, PatientComparator> patientQueue;
+
+    patientQueue.push(Patient("John Doe", 2, 8, 1));
+    patientQueue.push(Patient("Jane Smith", 1, 10, 2));
+    patientQueue.push(Patient("Sam Brown", 3, 7, 3));
+    patientQueue.push(Patient("Alice Green", 1, 9, 4));
+
+    std::cout << "Initial Patient Queue (Processed in Order):\n";
+    while (!patientQueue.empty()) {
+        Patient p = patientQueue.top();
+        patientQueue.pop();
+        std::cout << "Name: " << p.name
+                  << " | Priority: " << p.triagePriority
+                  << " | Severity: " << p.severity
+                  << " | Arrival Time: " << p.arrivalTime << "\n";
+    }
+
+    std::cout << "\nAdding new patients dynamically:\n";
+    patientQueue.push(Patient("Bob White", 1, 7, 5));
+    patientQueue.push(Patient("Mary Black", 2, 8, 6));
+    patientQueue.push(Patient("Tom Grey", 3, 6, 7));
+
+    std::cout << "\nUpdated Patient Queue (Processed in Order):\n";
+    while (!patientQueue.empty()) {
+        Patient p = patientQueue.top();
+        patientQueue.pop();
+        std::cout << "Name: " << p.name
+                  << " | Priority: " << p.triagePriority
+                  << " | Severity: " << p.severity
+                  << " | Arrival Time: " << p.arrivalTime << "\n";
+    }
+
+    return 0;
+}
