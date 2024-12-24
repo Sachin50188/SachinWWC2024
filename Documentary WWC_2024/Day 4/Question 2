@@ -1,0 +1,68 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <string>
+#include <map>
+
+struct TradeRecord {
+    std::string timestamp;
+    std::string stockSymbol;
+    double tradePrice;
+    int tradeVolume;
+
+    TradeRecord(const std::string& ts, const std::string& symbol, double price, int volume)
+        : timestamp(ts), stockSymbol(symbol), tradePrice(price), tradeVolume(volume) {}
+};
+
+bool compareByTimestamp(const TradeRecord& t1, const TradeRecord& t2) {
+    return t1.timestamp < t2.timestamp;
+}
+
+bool compareByStockSymbol(const TradeRecord& t1, const TradeRecord& t2) {
+    return t1.stockSymbol < t2.stockSymbol;
+}
+
+std::map<int, std::vector<TradeRecord>> groupByVolume(const std::vector<TradeRecord>& trades) {
+    std::map<int, std::vector<TradeRecord>> groupedTrades;
+    for (const auto& trade : trades) {
+        groupedTrades[trade.tradeVolume].push_back(trade);
+    }
+    return groupedTrades;
+}
+
+int main() {
+
+    std::vector<TradeRecord> trades = {
+        {"2024-12-24T10:00:01", "AAPL", 175.5, 100},
+        {"2024-12-24T10:00:02", "GOOG", 2850.0, 200},
+        {"2024-12-24T10:00:03", "MSFT", 320.0, 100},
+        {"2024-12-24T10:00:01", "AAPL", 176.0, 150},
+        {"2024-12-24T10:00:05", "GOOG", 2855.0, 300}
+    };
+
+    std::sort(trades.begin(), trades.end(), compareByTimestamp);
+    std::cout << "Trades sorted by Timestamp:\n";
+    for (const auto& trade : trades) {
+        std::cout << trade.timestamp << " | " << trade.stockSymbol << " | $"
+                  << trade.tradePrice << " | Volume: " << trade.tradeVolume << "\n";
+    }
+
+    std::sort(trades.begin(), trades.end(), compareByStockSymbol);
+    std::cout << "\nTrades sorted by Stock Symbol:\n";
+    for (const auto& trade : trades) {
+        std::cout << trade.timestamp << " | " << trade.stockSymbol << " | $"
+                  << trade.tradePrice << " | Volume: " << trade.tradeVolume << "\n";
+    }
+
+    auto groupedTrades = groupByVolume(trades);
+    std::cout << "\nTrades grouped by Trade Volume:\n";
+    for (const auto& [volume, tradeList] : groupedTrades) {
+        std::cout << "Volume: " << volume << "\n";
+        for (const auto& trade : tradeList) {
+            std::cout << "  " << trade.timestamp << " | " << trade.stockSymbol << " | $"
+                      << trade.tradePrice << "\n";
+        }
+    }
+
+    return 0;
+}
